@@ -1,20 +1,22 @@
 pub enum Node {
     // Document
     Document,
-    // Container blocks
     // Leaf blocks
+    Paragraph,
     ThematicBreak,
     Heading(HeadingNode),
-
+    CodeBlock,
+    // Container blocks
     BlockQuote,
-    HTMLBlock, // inlines
+    ListItem,
+    List,
 }
 
-struct HeadingNode {
-    id: u32,
-    parent_id: u32,
-    heading_level: u8,
-    content: String,
+pub struct HeadingNode {
+    pub id: u32,
+    pub parent_id: u32,
+    pub heading_level: u8,
+    pub content: String,
 }
 
 impl Node {

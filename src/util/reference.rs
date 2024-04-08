@@ -1,3 +1,81 @@
+// Entity and character references are not recognized in code blocks and code spans.
+// Entity and character references cannot stand in place of special characters that define structural elements in CommonMark.
+// numeric character references
+
+fn is_decimal_numeric_character_reference(text: &str) -> bool {
+    // 文字列が最小の長さより短い場合は、参照ではないと判断します
+    if text.len() < 4 {
+        return false;
+    }
+
+    // 最初の文字が '&' でない場合は参照ではないと判断します
+    if text.chars().nth(0) != Some('&') {
+        return false;
+    }
+
+    // 最後の文字が ';' でない場合は参照ではないと判断します
+    if text.chars().nth(text.len() - 1) != Some(';') {
+        return false;
+    }
+
+    // '&' と ';' の間の文字列が数字でない場合は参照ではないと判断します
+    let numeric_part = &text[1..text.len() - 1]; // '&' と ';' を除いた部分
+    if !numeric_part.chars().all(|c| c.is_ascii_digit()) {
+        return false;
+    }
+
+    // 数字の長さが1から7の範囲外の場合は参照ではないと判断します
+    if numeric_part.is_empty() || numeric_part.len() > 7 {
+        return false;
+    }
+
+    true
+}
+
+fn is_hexadecimal_numeric_character_reference(text: &str) -> bool {
+    // 文字列が最小の長さより短い場合は、参照ではないと判断します
+    if text.len() < 4 {
+        return false;
+    }
+
+    // 最初の文字が '&' でない場合は参照ではないと判断します
+    if text.chars().nth(0) != Some('&') {
+        return false;
+    }
+
+    // 最後の文字が ';' でない場合は参照ではないと判断します
+    if text.chars().nth(text.len() - 1) != Some(';') {
+        return false;
+    }
+
+    // '&' と ';' の間の文字列を取得します
+    let reference_content = &text[1..text.len() - 1]; // '&' と ';' を除いた部分
+
+    // 'X' または 'x' が含まれていない場合は参照ではないと判断します
+    if !reference_content.contains('X') && !reference_content.contains('x') {
+        return false;
+    }
+
+    // 'X' または 'x' の位置を確認します
+    let index_of_x = reference_content.find('X').or(reference_content.find('x'));
+    match index_of_x {
+        Some(index) => {
+            // 'X' または 'x' の後ろに16進数の文字列があることを確認します
+            let hex_part = &reference_content[index + 1..];
+            if hex_part.len() < 1
+                || hex_part.len() > 6
+                || !hex_part.chars().all(|c| c.is_ascii_hexdigit())
+            {
+                return false;
+            }
+        }
+        None => return false, // 'X' または 'x' が見つからない場合は参照ではないと判断します
+    }
+
+    true
+}
+
+// HTML entity references
 // Example 29
 // > Although HTML5 does accept some entity references without a trailing semicolon (such as &copy),
 // > these are not recognized here

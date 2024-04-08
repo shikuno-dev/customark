@@ -1,6 +1,18 @@
 pub const Tab: char = '\u{0009}';
 pub const Space: char = '\u{0020}';
 
+// A backslash at the end of the line is a hard line break
+
+fn is_backslash_escaped(char: char) -> bool {
+    // 文字の ASCII コードを取得
+    let char_code = char as u8;
+
+    // Any **ASCII punctuation** character may be backslash-escaped
+    // Backslash escapes do not work in **code blocks**, **code spans**, **autolinks**, or **raw HTML**
+    // But they work in all other contexts, including URLs and link titles, link references, and info strings in fenced code blocks
+    is_ascii_punctuation_char(char_code)
+}
+
 pub fn normalize_newlines(text: &str) -> String {
     text.replace("\r\n", "\n").replace('\r', "\n")
 }
@@ -38,10 +50,11 @@ fn is_ascii_control_char(code_point: u32) -> bool {
 }
 
 // ASCII punctuation character: U+0021–2F, U+005B–0060 or U+007B–007E
-fn is_ascii_punctuation_char(code_point: u32) -> bool {
-    (0x0021..=0x002F).contains(&code_point)
-        || (0x005B..=0x0060).contains(&code_point)
-        || (0x007B..=0x007E).contains(&code_point)
+fn is_ascii_punctuation_char(code_point: u8) -> bool {
+    (0x0021..=0x002F).contains(&code_point) // !, ", #, $, %, &, ', (, ), *, +, ,, -, ., /
+        || (0x003A..=0x0040).contains(&code_point) // :, ;, <, =, >, ?, @
+        || (0x005B..=0x0060).contains(&code_point) // [, \, ], ^, _, `
+        || (0x007B..=0x007E).contains(&code_point) // {, |, }, ~
 }
 // Example 12
 // > Any ASCII punctuation character may be backslash-escaped

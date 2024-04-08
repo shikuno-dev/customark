@@ -1,3 +1,3 @@
-pub mod entity;
-mod tab;
+pub mod reference;
+pub mod tab;
 pub mod unicode;
