@@ -1,3 +1,5 @@
+pub mod code_block;
+pub mod hr;
 pub mod list;
 
 use crate::util::{
@@ -5,8 +7,15 @@ use crate::util::{
     unicode::is_blank_line,
 };
 
-enum BlockStateType {
-    // Idle,
+fn count_indentation(markdown: &str) -> Vec<usize> {
+    markdown
+        .lines()
+        .map(|line| line.chars().take_while(|&c| c == ' ').count())
+        .collect()
+}
+
+#[derive(PartialEq)]
+pub enum BlockStateType {
     Paragraph,
     ThematicBreak,
     ATXHeading,
@@ -14,7 +23,6 @@ enum BlockStateType {
     IndentedCodeBlock,
     HTMLBlock,
     FencedCodeBlock,
-
     BlockQuote,
     ListItem,
     List,
@@ -40,37 +48,75 @@ impl BlockState {
     }
 }
 
+enum TokenType {
+    Paragraph,
+    Headng,
+    ThematicBreak,
+    CodeBlock,
+    HTMLBlock,
+    BlockQuote,
+    ListItem,
+    List,
+}
+
 struct Token {}
 
 // normalize_newlines --> lines
 //  let lines: Vec<&str> = normalized_text.split('\n').collect();
 pub fn tokenize(lines: Vec<&str>) {
-    let block_state: BlockState = BlockState::new();
-    let tokens: Vec<Token> = Vec::new();
+    let mut block_state: BlockState = BlockState::new();
+    let mut tokens: Vec<Token> = Vec::new();
 
-    let mut current_token = Token {};
+    // let mut current_token = Token {};
+    let mut consecutive_blank_lines_count: usize = 0;
+    let mut current_content = String::new();
 
     // block_state.block_stack.len();
 
     for (row, line) in lines.iter().enumerate() {
         let mut column = 0;
 
-        if (is_blank_line(&line)) {}
-
-        // if( block_state ){
-        // expand_tabs(n)
-        // }
-
         if block_state.stack.len() == 0 {
-            while column < line.len() {
-                if column == 0 {
-                    let word = &line[column..column];
-                    if word == "\u{0009}" {
-                    } else if word == "\u{0020}" {
+            // for (column, char) in line.chars().enumerate() {}
+            let mut indent_count: usize = 0;
+
+            if !is_blank_line(line) {
+                let mut chars = line.chars();
+                while column < line.chars().count() {
+                    let ch = chars.nth(column).unwrap(); // Access character at column
+                    if column == 0 {
+                        match ch {
+                            '\t' => {
+                                // indented_code_block
+                                block_state.open(BlockStateType::IndentedCodeBlock);
+                                current_content.push_str(&line[1..]);
+                                continue;
+                            }
+                            ' ' => {
+                                indent_count += 1;
+                                //
+                                //
+                                // Handle spaces based on your specific logic
+                                // (e.g., indent or not based on context)
+                            }
+                            _ => {
+                                // Handle other characters as needed
+                            }
+                        }
+                        column += 1;
                     }
                 }
             }
         } else if block_state.stack.len() == 1 {
+            if let Some(last_element) = block_state.stack.last() {
+                if *last_element == BlockStateType::IndentedCodeBlock {
+                    if is_blank_line(line) {
+                        consecutive_blank_lines_count += 1;
+                    } else {
+                    }
+                }
+            }
+        } else { //  block_state.stack.len() > 1
         }
 
         // for (column, word) in line.split_whitespace().enumerate() {
@@ -96,57 +142,4 @@ fn count_indent(line: &str, n: usize) -> usize {
     }
 
     indent_count
-}
-
-pub fn is_thematic_breaks(line: &str) -> bool {
-    // Count the number of leading spaces or tabs
-    let mut indent_count = 0;
-    for c in line.chars() {
-        if c == ' ' || c == '\t' {
-            indent_count += 1;
-        } else {
-            break;
-        }
-    }
-
-    // 先頭の空白またはタブの数が3未満の場合はテーマ区切りではない
-    if indent_count >= 3 {
-        // 先頭の空白またはタブを除去した行を取得
-        let line_trimmed = &line[indent_count..];
-
-        // テーマ区切りの文字を定義
-        let thematic_chars = ['-', '_', '*'];
-
-        // テーマ区切りの文字で構成されているかを確認
-        let mut char_count = 0;
-        let mut last_char: Option<char> = None;
-        for c in line_trimmed.chars() {
-            if thematic_chars.contains(&c) {
-                char_count += 1;
-                last_char = Some(c);
-            } else if c != ' ' && c != '\t' {
-                // テーマ区切りの文字以外が見つかった場合はテーマ区切りではない
-                return false;
-            }
-        }
-
-        // 3つ以上のテーマ区切りの文字があるかどうかを確認
-        if char_count >= 3 {
-            // テーマ区切りの最後の文字を取得
-            if let Some(last_char) = last_char {
-                // テーマ区切りの最後の文字以降にスペースまたはタブがあるかを確認
-                for c in line_trimmed.chars().rev() {
-                    if c != ' ' && c != '\t' {
-                        return false;
-                    } else if c != last_char {
-                        break;
-                    }
-                }
-
-                return true;
-            }
-        }
-    }
-
-    false
 }
