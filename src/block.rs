@@ -4,7 +4,7 @@ pub mod list;
 
 use crate::util::{
     tab::{calculate_spaces_until_next_tab_stop, expand_tabs},
-    unicode::is_blank_line,
+    unicode::{is_blank_line, normalize_newlines},
 };
 
 fn count_indentation(markdown: &str) -> Vec<usize> {
@@ -61,85 +61,46 @@ enum TokenType {
 
 struct Token {}
 
-// normalize_newlines --> lines
-//  let lines: Vec<&str> = normalized_text.split('\n').collect();
-pub fn tokenize(lines: Vec<&str>) {
+pub fn tokenize(text: &str) {
+    let normalized_text: String = normalize_newlines(text);
     let mut block_state: BlockState = BlockState::new();
-    let mut tokens: Vec<Token> = Vec::new();
 
-    // let mut current_token = Token {};
-    let mut consecutive_blank_lines_count: usize = 0;
-    let mut current_content = String::new();
+    for (row, line) in normalized_text.lines().enumerate() {
+        let mut column: usize = 0;
 
-    // block_state.block_stack.len();
-
-    for (row, line) in lines.iter().enumerate() {
-        let mut column = 0;
-
-        if block_state.stack.len() == 0 {
-            // for (column, char) in line.chars().enumerate() {}
-            let mut indent_count: usize = 0;
-
-            if !is_blank_line(line) {
-                let mut chars = line.chars();
-                while column < line.chars().count() {
-                    let ch = chars.nth(column).unwrap(); // Access character at column
-                    if column == 0 {
-                        match ch {
-                            '\t' => {
-                                // indented_code_block
-                                block_state.open(BlockStateType::IndentedCodeBlock);
-                                current_content.push_str(&line[1..]);
-                                continue;
-                            }
-                            ' ' => {
-                                indent_count += 1;
-                                //
-                                //
-                                // Handle spaces based on your specific logic
-                                // (e.g., indent or not based on context)
-                            }
-                            _ => {
-                                // Handle other characters as needed
-                            }
-                        }
-                        column += 1;
-                    }
-                }
-            }
-        } else if block_state.stack.len() == 1 {
-            if let Some(last_element) = block_state.stack.last() {
-                if *last_element == BlockStateType::IndentedCodeBlock {
-                    if is_blank_line(line) {
-                        consecutive_blank_lines_count += 1;
-                    } else {
-                    }
-                }
-            }
-        } else { //  block_state.stack.len() > 1
+        if block_state.stack.is_empty() {
+            println!("###");
         }
-
-        // for (column, word) in line.split_whitespace().enumerate() {
-        //     println!("  Word {}: {}", column + 1, word);
-        // }
+        _tokenize(line.to_string(), &mut column, &mut block_state);
+        println!("{}", column);
     }
 }
 
-fn count_indent(line: &str, n: usize) -> usize {
-    // Count the number of leading spaces or tabs
-    let mut indent_count = 0;
-    let mut position = 1;
+fn _tokenize(line: String, column: &mut usize, block_state: &mut BlockState) {
+    // *column += 1;
+    process_indentation(line, 0);
 
-    for c in line.chars() {
-        if c == ' ' {
-            indent_count += 1;
-        } else if c == '\t' {
-            indent_count += calculate_spaces_until_next_tab_stop(position);
+    // if (*column < 10) {
+    //     _tokenize(line, column, block_state);
+    // }
+}
+
+fn process_indentation(mut line: String, required_indent: usize) -> String {
+    if required_indent == 0 {
+        if let Some(position) = line.find('\t') {
+            if (position > 3) {
+                let spaces = calculate_spaces_until_next_tab_stop(position);
+                let mut new_line = " ".repeat(spaces + position);
+                new_line.push_str(&line[position + 1..]);
+                return new_line;
+            }
         } else {
-            break;
+            return line.to_string();
         }
-        position += 1;
+    } else {
+        // required_indentが0でない場合の処理
+        println!("###");
+        return line.to_string();
     }
-
-    indent_count
+    line
 }
