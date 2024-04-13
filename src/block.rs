@@ -43,6 +43,16 @@ impl BlockState {
         self.stack.pop();
     }
 
+    fn clear(&mut self) {
+        self.stack.clear();
+    }
+
+    fn truncate_from(&mut self, position: usize) {
+        if position < self.stack.len() {
+            self.stack.truncate(position);
+        }
+    }
+
     fn current_block_state_type(&self) -> Option<&BlockStateType> {
         self.stack.last()
     }
@@ -65,13 +75,44 @@ pub fn tokenize(text: &str) {
     let normalized_text: String = normalize_newlines(text);
     let mut block_state: BlockState = BlockState::new();
 
-    for (row, line) in normalized_text.lines().enumerate() {
-        let mut column: usize = 0;
+    let mut can_continue_paragraph_text: bool = false; // if block_state.stack.last() == Some(&BlockStateType::Paragraph)
+                                                       // can_continue_paragraph_text &&
 
-        if block_state.stack.is_empty() {
-            println!("###");
+    for (row, line) in normalized_text.lines().enumerate() {
+        let mut column: usize = 0; // Required for expanding tab
+
+        // let mut tokens: Vec<Token> = Vec::new();
+
+        if is_blank_line(line) {
+            if block_state.stack.is_empty() {
+                println!("###");
+            } else if block_state.stack.len() == 1 {
+                // A sequence of non-blank lines that cannot be interpreted as other kinds of blocks forms a paragraph.
+                if block_state.stack.last() == Some(&BlockStateType::Paragraph) {
+                    // P Token is closed
+                    block_state.clear();
+
+                // A line consisting of optionally up to three spaces of indentation,
+                // followed by a sequence of three or more matching -, _, or * characters,
+                // each followed optionally by any number of spaces or tabs, forms a thematic break.
+                } else if block_state.stack.last() == Some(&BlockStateType::ThematicBreak)
+                    || block_state.stack.last() == Some(&BlockStateType::ATXHeading)
+                    || block_state.stack.last() == Some(&BlockStateType::SetextHeading)
+                {
+                    block_state.clear();
+                    // Thematic breaks do not need blank lines before or after (Example 57)
+                    // ATX headings need not be separated from surrounding content by blank lines, and they can interrupt paragraphs (Example 77)
+                    // A blank line is needed between a paragraph and a following setext heading,
+                    // since otherwise the paragraph becomes part of the heading’s content: (Example 95)
+                    // But in general a blank line is not required before or after setext headings: (Example 96)
+                }
+            } else if block_state.stack.len() > 1 {
+                // list, quote
+            }
+        } else {
+            _tokenize(line.to_string(), &mut column, &mut block_state);
         }
-        _tokenize(line.to_string(), &mut column, &mut block_state);
+
         println!("{}", column);
     }
 }
@@ -88,8 +129,9 @@ fn _tokenize(line: String, column: &mut usize, block_state: &mut BlockState) {
 fn process_indentation(mut line: String, required_indent: usize) -> String {
     if required_indent == 0 {
         if let Some(position) = line.find('\t') {
-            if (position > 3) {
+            if position < 3 && line[0..position].chars().all(|c| c == ' ') {
                 let spaces = calculate_spaces_until_next_tab_stop(position);
+                // let spaces = calculate_spaces_until_next_tab_stop(position + column);
                 let mut new_line = " ".repeat(spaces + position);
                 new_line.push_str(&line[position + 1..]);
                 return new_line;
