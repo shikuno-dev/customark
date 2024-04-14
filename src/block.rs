@@ -13,7 +13,6 @@ fn count_indentation(markdown: &str) -> Vec<usize> {
         .map(|line| line.chars().take_while(|&c| c == ' ').count())
         .collect()
 }
-
 #[derive(PartialEq)]
 pub enum BlockStateType {
     Paragraph,
@@ -23,6 +22,7 @@ pub enum BlockStateType {
     IndentedCodeBlock,
     HTMLBlock,
     FencedCodeBlock,
+    LinkDefinitions, // LinkReferenceDefinitions,
     BlockQuote,
     ListItem,
     List,
@@ -30,6 +30,7 @@ pub enum BlockStateType {
 struct BlockState {
     stack: Vec<BlockStateType>, // open blocks
 }
+
 impl BlockState {
     fn new() -> Self {
         BlockState { stack: Vec::new() }
@@ -42,6 +43,12 @@ impl BlockState {
     fn close(&mut self) {
         self.stack.pop();
     }
+    fn initial_state(&self) -> Option<&BlockStateType> {
+        self.stack.first()
+    }
+    fn current_block_state_type(&self) -> Option<&BlockStateType> {
+        self.stack.last()
+    }
 
     fn clear(&mut self) {
         self.stack.clear();
@@ -53,9 +60,40 @@ impl BlockState {
         }
     }
 
-    fn current_block_state_type(&self) -> Option<&BlockStateType> {
-        self.stack.last()
+    // // fn find_position(&self, block_type: &BlockStateType) -> Option<usize> {
+    // fn find_index(&self, block_type: &BlockStateType) -> Option<usize> {
+    //     self.stack.iter().position(|t| t == block_type)
+    // }
+
+    fn contains(&self, block_type: &BlockStateType) -> bool {
+        self.stack.contains(block_type)
     }
+    fn find_position(&self, block_type: &BlockStateType) -> Option<usize> {
+        self.stack.iter().position(|t| t == block_type)
+    }
+}
+
+#[derive(Debug)]
+struct LinkReferenceDefinition {
+    label: String,
+    destination: String,
+    title: Option<String>,
+}
+
+impl LinkReferenceDefinition {
+    fn label_matches(&self, target_label: &str) -> bool {
+        self.label == target_label
+    }
+}
+// If there are several matching definitions, the first one takes precedence:
+// matching of labels is case-insensitive
+fn has_matching_label(link_definitions: &[LinkReferenceDefinition], target_label: &str) -> bool {
+    for definition in link_definitions {
+        if definition.label_matches(target_label) {
+            return true;
+        }
+    }
+    false
 }
 
 enum TokenType {
@@ -75,6 +113,7 @@ pub fn tokenize(text: &str) {
     let normalized_text: String = normalize_newlines(text);
     let mut block_state: BlockState = BlockState::new();
 
+    let mut consecutive_blank_lines_count: usize = 0;
     let mut can_continue_paragraph_text: bool = false; // if block_state.stack.last() == Some(&BlockStateType::Paragraph)
                                                        // can_continue_paragraph_text &&
 
@@ -85,11 +124,14 @@ pub fn tokenize(text: &str) {
 
         if is_blank_line(line) {
             if block_state.stack.is_empty() {
-                println!("###");
+                continue;
             } else if block_state.stack.len() == 1 {
                 // A sequence of non-blank lines that cannot be interpreted as other kinds of blocks forms a paragraph.
                 if block_state.stack.last() == Some(&BlockStateType::Paragraph) {
                     // P Token is closed
+
+                    // An indented code block cannot interrupt a paragraph. (This allows hanging indents and the like.) (Example 113)
+
                     block_state.clear();
 
                 // A line consisting of optionally up to three spaces of indentation,
@@ -105,9 +147,40 @@ pub fn tokenize(text: &str) {
                     // A blank line is needed between a paragraph and a following setext heading,
                     // since otherwise the paragraph becomes part of the heading’s content: (Example 95)
                     // But in general a blank line is not required before or after setext headings: (Example 96)
+                } else if block_state.stack.last() == Some(&BlockStateType::IndentedCodeBlock) {
+                    consecutive_blank_lines_count += 1;
+                } else if block_state.stack.last() == Some(&BlockStateType::FencedCodeBlock) {
+                } else if block_state.stack.last() == Some(&BlockStateType::HTMLBlock) {
+                    // type 1-5
+                    consecutive_blank_lines_count += 1;
+                    // type 6-7
+                    // HTMLBlock Token is closed
+                } else if block_state.stack.last() == Some(&BlockStateType::LinkDefinitions) {
+                    block_state.clear();
                 }
             } else if block_state.stack.len() > 1 {
                 // list, quote
+                if block_state.stack.first() == Some(&BlockStateType::BlockQuote) {
+                    block_state.clear();
+                }
+                if block_state.stack.first() == Some(&BlockStateType::List) {
+                    if let Some(position) = block_state.find_position(&BlockStateType::BlockQuote) {
+                        // positoin of quote
+                        block_state.truncate_from(position);
+                    } else {
+                        if block_state.stack.last() == Some(&BlockStateType::Paragraph)
+                            || block_state.stack.last() == Some(&BlockStateType::ThematicBreak)
+                            || block_state.stack.last() == Some(&BlockStateType::ATXHeading)
+                            || block_state.stack.last() == Some(&BlockStateType::SetextHeading)
+                        {
+                            //
+                        } else if block_state.stack.last()
+                            == Some(&BlockStateType::IndentedCodeBlock)
+                        {
+                            consecutive_blank_lines_count += 1;
+                        }
+                    }
+                }
             }
         } else {
             _tokenize(line.to_string(), &mut column, &mut block_state);
