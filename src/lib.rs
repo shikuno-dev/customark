@@ -1,5 +1,5 @@
 mod block;
 mod inline;
-pub mod node;
 mod parser;
+mod token;
 mod util;
