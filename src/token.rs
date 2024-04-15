@@ -155,7 +155,10 @@ impl ListItemToken {
 #[derive(Debug)]
 pub enum ListType {
     Ordered,
-    Bullet,
+    // -, +, or *
+    BulletMinus,
+    BulletPlus,
+    BulletAsterisk,
 }
 
 #[derive(Debug)]
