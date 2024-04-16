@@ -18,8 +18,7 @@ pub fn normalize_newlines(text: &str) -> String {
 }
 
 pub fn is_blank_line(line: &str) -> bool {
-    line.chars()
-        .all(|c| c == ' ' || c == '\t' || c == '\r' || c == '\n')
+    line.chars().all(|c| c == ' ' || c == '\t')
 }
 
 // For security reasons, U+0000 must be replaced with U+FFFD.

@@ -1,4 +1,4 @@
-pub fn is_thematic_breaks(line: &str) -> bool {
+pub fn is_thematic_breaks(line: String) -> bool {
     // Count the number of leading spaces or tabs
     let mut indent_count = 0;
     for c in line.chars() {
