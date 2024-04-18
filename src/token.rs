@@ -1,22 +1,22 @@
 #[derive(Debug)]
 pub enum Token {
-    Paragraph(ParagraphToken),
-    Heading(HeadingToken),
+    Paragraph(Paragraph),
+    Heading(Heading),
     ThematicBreak,
-    CodeBlock(CodeBlockToken),
-    HTMLBlock(HTMLBlockToken),
-    BlockQuote(BlockQuoteToken),
-    List(ListToken),
-    ListItem(ListItemToken),
+    CodeBlock(CodeBlock),
+    HTMLBlock(HTMLBlock),
+    BlockQuote(BlockQuote),
+    List(List),
+    ListItem(ListItem),
 }
 
 impl Token {
     pub fn paragraph(inline_text: String) -> Self {
-        Token::Paragraph(ParagraphToken::new(inline_text))
+        Token::Paragraph(Paragraph::new(inline_text))
     }
 
     pub fn heading(inline_text: String, heading_level: u8) -> Self {
-        Token::Heading(HeadingToken::new(inline_text, heading_level))
+        Token::Heading(Heading::new(inline_text, heading_level))
     }
 
     pub fn thematic_break() -> Self {
@@ -24,28 +24,28 @@ impl Token {
     }
 
     pub fn code_block(text: String, info_string: String) -> Self {
-        Token::CodeBlock(CodeBlockToken::new(text, info_string))
+        Token::CodeBlock(CodeBlock::new(text, info_string))
     }
 
     pub fn html_block(text: String) -> Self {
-        Token::HTMLBlock(HTMLBlockToken::new(text))
+        Token::HTMLBlock(HTMLBlock::new(text))
     }
 
     pub fn block_quote(len: usize) -> Self {
-        Token::BlockQuote(BlockQuoteToken::new(len))
+        Token::BlockQuote(BlockQuote::new(len))
     }
 
     pub fn list(list_type: ListType, start: usize, tight: bool, len: usize) -> Self {
-        Token::List(ListToken::new(list_type, start, tight, len))
+        Token::List(List::new(list_type, start, tight, len))
     }
 
     pub fn list_item(len: usize) -> Self {
-        Token::ListItem(ListItemToken::new(len))
+        Token::ListItem(ListItem::new(len))
     }
 
     pub fn convert_to_heading(&mut self, heading_level: u8) -> Option<Self> {
         match self {
-            Token::Paragraph(paragraph_token) => Some(Token::Heading(HeadingToken {
+            Token::Paragraph(paragraph_token) => Some(Token::Heading(Heading {
                 inline_text: paragraph_token.inline_text.clone(),
                 heading_level,
             })),
@@ -64,13 +64,13 @@ impl Token {
 }
 
 #[derive(Debug)]
-pub struct ParagraphToken {
+pub struct Paragraph {
     pub inline_text: String,
 }
 
-impl ParagraphToken {
+impl Paragraph {
     pub fn new(inline_text: String) -> Self {
-        ParagraphToken { inline_text }
+        Paragraph { inline_text }
     }
     pub fn set_inline_text(&mut self, new_inline_text: String) {
         self.inline_text = new_inline_text;
@@ -78,14 +78,14 @@ impl ParagraphToken {
 }
 
 #[derive(Debug)]
-pub struct HeadingToken {
+pub struct Heading {
     pub inline_text: String,
     pub heading_level: u8,
 }
 
-impl HeadingToken {
+impl Heading {
     pub fn new(inline_text: String, heading_level: u8) -> Self {
-        HeadingToken {
+        Heading {
             inline_text,
             heading_level,
         }
@@ -95,13 +95,13 @@ impl HeadingToken {
     }
 }
 #[derive(Debug)]
-pub struct CodeBlockToken {
+pub struct CodeBlock {
     pub text: String,
     pub info_string: String,
 }
-impl CodeBlockToken {
+impl CodeBlock {
     pub fn new(text: String, info_string: String) -> Self {
-        CodeBlockToken { text, info_string }
+        CodeBlock { text, info_string }
     }
     pub fn set_inline_text(&mut self, new_text: String) {
         self.text = new_text;
@@ -109,13 +109,13 @@ impl CodeBlockToken {
 }
 
 #[derive(Debug)]
-pub struct HTMLBlockToken {
+pub struct HTMLBlock {
     pub text: String,
 }
 
-impl HTMLBlockToken {
+impl HTMLBlock {
     pub fn new(text: String) -> Self {
-        HTMLBlockToken { text }
+        HTMLBlock { text }
     }
     pub fn set_inline_text(&mut self, new_text: String) {
         self.text = new_text;
@@ -123,13 +123,13 @@ impl HTMLBlockToken {
 }
 
 #[derive(Debug)]
-pub struct BlockQuoteToken {
+pub struct BlockQuote {
     pub len: usize,
 }
 
-impl BlockQuoteToken {
+impl BlockQuote {
     pub fn new(len: usize) -> Self {
-        BlockQuoteToken { len }
+        BlockQuote { len }
     }
 
     pub fn set_len(&mut self, new_len: usize) {
@@ -138,13 +138,13 @@ impl BlockQuoteToken {
 }
 
 #[derive(Debug)]
-pub struct ListItemToken {
+pub struct ListItem {
     pub len: usize,
 }
 
-impl ListItemToken {
+impl ListItem {
     pub fn new(len: usize) -> Self {
-        ListItemToken { len }
+        ListItem { len }
     }
 
     pub fn set_len(&mut self, new_len: usize) {
@@ -162,16 +162,16 @@ pub enum ListType {
 }
 
 #[derive(Debug)]
-pub struct ListToken {
+pub struct List {
     pub list_type: ListType,
     pub start: usize,
     pub tight: bool,
     pub len: usize,
 }
 
-impl ListToken {
+impl List {
     pub fn new(list_type: ListType, start: usize, tight: bool, len: usize) -> Self {
-        ListToken {
+        List {
             list_type,
             start,
             tight,
