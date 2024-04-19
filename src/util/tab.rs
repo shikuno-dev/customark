@@ -5,6 +5,6 @@ pub fn expand_tabs(n: usize) -> String {
 }
 
 pub fn calculate_spaces_until_next_tab_stop(position: usize) -> usize {
-    let tab_stop_size = 4; // タブ停止のサイズ
+    let tab_stop_size = 4;
     tab_stop_size - (position % tab_stop_size)
 }
