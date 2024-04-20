@@ -21,6 +21,15 @@ pub fn is_blank_line(line: &str) -> bool {
     line.chars().all(|c| c == ' ' || c == '\t')
 }
 
+pub fn trim_end_blank_line(text: String) -> String {
+    text.trim_end_matches(|c: char| c == ' ' || c == '\t' || c == '\n')
+        .to_string()
+}
+
+pub fn count_consecutive_char(line: String, target_char: char) -> usize {
+    line.chars().take_while(|&c| c == target_char).count()
+}
+
 // For security reasons, U+0000 must be replaced with U+FFFD.
 pub fn replaced_insecure_characters(text: String) -> String {
     text.replace('\u{0000}', "\u{FFFD}")
