@@ -71,12 +71,23 @@ pub fn apply_start_rule(
 
 pub fn apply_continuance_rule() {}
 
-pub trait BlockStateType {
-    fn should_start(&self) -> bool;
+pub trait BlockRule {
+    // Method to determine the start condition of a block
+    fn should_start(&self, text: &str) -> bool;
 
-    fn should_continue(&self, text: String) -> bool;
+    // Method to determine the continuation condition of a block
+    fn should_continue(&self, text: &str) -> bool;
 
-    fn start(&mut self, text: String);
+    // Method to handle the start of the block
+    fn handle_start(&mut self, text: &str);
+
+    // Method to handle the continuation of the block
+    // Returns an optional string representing any additional text processed
+    // or None if no additional text is processed
+    fn handle_continuation(&mut self, text: &str) -> Option<String>;
+
+    // Method to handle the end of the block
+    fn finalize(&mut self);
 }
 
 struct ThematicBreakState;
