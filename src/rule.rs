@@ -17,6 +17,36 @@ pub trait BlockRule {
     fn finalize(&mut self);
 }
 
+struct BlockRuleManager {
+    rules: Vec<Box<dyn BlockRule>>,
+}
+
+impl BlockRuleManager {
+    // fn new(rules: Vec<Box<dyn BlockRule>>) -> Self {
+    //     let mut manager = BlockRuleManager { rules };
+    fn new() -> Self {
+        let mut manager = BlockRuleManager { rules: Vec::new() };
+        manager
+    }
+
+    fn add(&mut self, rule: Box<dyn BlockRule>) {
+        self.rules.push(rule);
+    }
+    fn remove_last(&mut self) {
+        self.rules.pop();
+    }
+
+    pub fn clear(&mut self) {
+        self.rules.clear();
+    }
+
+    pub fn truncate_from(&mut self, position: usize) {
+        if position < self.rules.len() {
+            self.rules.truncate(position);
+        }
+    }
+}
+
 pub fn is_blank_line(line: &str) -> bool {
     line.chars()
         .all(|c| c == ' ' || c == '\t' || c == '\r' || c == '\n')
