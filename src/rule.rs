@@ -1,3 +1,22 @@
+pub trait BlockRule {
+    // Method to determine the start condition of a block
+    fn should_start(&self, text: &str) -> bool;
+
+    // Method to determine the continuation condition of a block
+    fn should_continue(&self, text: &str) -> bool;
+
+    // Method to handle the start of the block
+    fn handle_start(&mut self, text: &str);
+
+    // Method to handle the continuation of the block
+    // Returns an optional string representing any additional text processed
+    // or None if no additional text is processed
+    fn handle_continuation(&mut self, text: &str) -> Option<String>;
+
+    // Method to handle the end of the block
+    fn finalize(&mut self);
+}
+
 pub fn is_blank_line(line: &str) -> bool {
     line.chars()
         .all(|c| c == ' ' || c == '\t' || c == '\r' || c == '\n')
