@@ -64,6 +64,32 @@ impl Token {
 }
 
 #[derive(Debug)]
+pub struct DocumentToken {
+    children: Vec<Box<dyn Token>>,
+}
+
+impl DocumentToken {
+    pub fn new() -> Self {
+        DocumentToken {
+            children: Vec::new(),
+        }
+    }
+}
+impl Token for DocumentToken {
+    fn is_leaf(&self) -> bool {
+        false
+    }
+    fn render(&self) -> String {
+        // let mut result = format!("{}:\n", self.name);
+        let mut result = String::new();
+        for child in &self.children {
+            result.push_str(&format!("{}\n", child.render()));
+        }
+        result
+    }
+}
+
+#[derive(Debug)]
 pub struct Paragraph {
     pub inline_text: String,
 }
