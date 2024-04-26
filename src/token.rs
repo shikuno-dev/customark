@@ -1,14 +1,14 @@
-#[derive(Debug)]
-pub enum Token {
-    Paragraph(Paragraph),
-    Heading(Heading),
-    ThematicBreak,
-    CodeBlock(CodeBlock),
-    HTMLBlock(HTMLBlock),
-    BlockQuote(BlockQuote),
-    List(List),
-    ListItem(ListItem),
-}
+// #[derive(Debug)]
+// pub enum Token {
+//     Paragraph(Paragraph),
+//     Heading(Heading),
+//     ThematicBreak,
+//     CodeBlock(CodeBlock),
+//     HTMLBlock(HTMLBlock),
+//     BlockQuote(BlockQuote),
+//     List(List),
+//     ListItem(ListItem),
+// }
 
 impl Token {
     pub fn paragraph(inline_text: String) -> Self {
