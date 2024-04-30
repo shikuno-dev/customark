@@ -31,11 +31,14 @@ impl BlockRule for AtxCodeBlockRule {
     }
 
     fn should_continue(&self, text: &String, current_column: usize) -> bool {
-        !is_blank_line(text) && count_indentation(text, current_column) > 4
+        false
     }
 
     fn handle_start(&mut self, text: &String, current_column: usize) -> Box<dyn Token> {
-        Box::new(HeadingToken::new(text, true))
+        let trimmed = text.trim_start();
+        let num_hashes = trimmed.chars().take_while(|&c| c == '#').count();
+
+        Box::new(HeadingToken::new(text, num_hashes))
     }
 
     fn handle_continuation(&mut self, text: &String, current_column: usize) -> Option<String> {
