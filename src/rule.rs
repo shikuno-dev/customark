@@ -86,6 +86,12 @@ pub trait BlockRule {
 
     // Method to handle the end of the block
     // fn finalize(&mut self);
+
+    // Method to determine whether current token should be transformed into a different type of token.
+    fn should_transform(&self, text: &String, current_column: usize) -> bool;
+
+    // Method to convert the current token to a different type of token.
+    fn handle_transform(&mut self, text: &String, current_column: usize) -> Box<dyn Token>;
 }
 
 pub fn apply_start_rule(
