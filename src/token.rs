@@ -1,3 +1,8 @@
+pub enum TokenType {
+    Root,
+    Block { name: String },
+    Inline { name: String },
+}
 // #[derive(Debug)]
 // pub enum Token {
 //     Paragraph(Paragraph),
