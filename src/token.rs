@@ -16,6 +16,9 @@ pub enum TokenType {
 // }
 pub trait Token {
     fn is_leaf(&self) -> bool;
+    fn token_type(&self) -> TokenType;
+    fn location(&self) -> Location;
+
     fn children(&self) -> Option<Vec<Box<dyn Token>>>;
 
     fn render(&self) -> String;
