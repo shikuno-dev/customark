@@ -1,227 +1,110 @@
-pub enum TokenType {
-    Root,
-    Block { name: String },
-    Inline { name: String },
-}
-// #[derive(Debug)]
-// pub enum Token {
-//     Paragraph(Paragraph),
-//     Heading(Heading),
-//     ThematicBreak,
-//     CodeBlock(CodeBlock),
-//     HTMLBlock(HTMLBlock),
-//     BlockQuote(BlockQuote),
-//     List(List),
-//     ListItem(ListItem),
-// }
-pub trait Token {
-    fn is_leaf(&self) -> bool;
-    fn token_type(&self) -> TokenType;
+pub trait CToken: std::fmt::Debug {
+    fn add_child(&mut self, child: Box<dyn CToken>);
+
+    fn token_type(&self) -> &TokenType;
+
     fn location(&self) -> Location;
 
-    fn children(&self) -> Option<Vec<Box<dyn Token>>>;
-
     fn render(&self) -> String;
-    fn update(&mut self, text: String);
+
+    // Method to determine the start condition of a block
+    fn should_start(&self, text: &String, current_column: usize) -> bool;
+
+    // Method to determine the continuation condition of a block
+    fn should_continue(&self, text: &String, current_column: usize) -> bool;
+
+    // Method to determine whether current token should be transformed into a different type of token.
+    fn should_transform(&self, text: &String, current_column: usize) -> bool;
+
+    // Method to handle the start of the block
+    fn handle_start(&mut self, text: &String, current_column: usize) -> Box<dyn CToken>;
+
+    // Method to handle the continuation of the block
+    fn handle_continuation(&mut self, text: &String, current_column: usize) -> Option<String>;
+
+    // Method to convert the current token to a different type of token.
+    fn handle_transform(&mut self, text: &String, current_column: usize) -> Box<dyn CToken>;
+
     fn finalize(&mut self);
 }
 
-// impl Token {
-//     pub fn paragraph(inline_text: String) -> Self {
-//         Token::Paragraph(Paragraph::new(inline_text))
-//     }
+#[derive(Debug)]
+pub enum TokenType {
+    Root,
+    BlockLeaf { name: String },
+    BlockContainer { name: String },
+    Inline { name: String },
+}
 
-//     pub fn heading(inline_text: String, heading_level: u8) -> Self {
-//         Token::Heading(Heading::new(inline_text, heading_level))
-//     }
+#[derive(Copy, Clone, Default, Debug)]
+pub(crate) struct Location {
+    pub(crate) line: usize,
+    pub(crate) column: usize,
+}
 
-//     pub fn thematic_break() -> Self {
-//         Token::ThematicBreak
-//     }
+#[derive(Debug)]
+pub struct RootToken {
+    token_type: TokenType,
+    location: Location,
+    children: Vec<Box<dyn CToken>>,
+}
 
-//     pub fn code_block(text: String, info_string: String) -> Self {
-//         Token::CodeBlock(CodeBlock::new(text, info_string))
-//     }
+impl RootToken {
+    pub fn new() -> Self {
+        RootToken {
+            token_type: TokenType::Root,
+            location: Location { line: 0, column: 0 },
+            children: Vec::new(),
+        }
+    }
+}
 
-//     pub fn html_block(text: String) -> Self {
-//         Token::HTMLBlock(HTMLBlock::new(text))
-//     }
+impl CToken for RootToken {
+    fn add_child(&mut self, child: Box<dyn CToken>) {
+        self.children.push(child);
+    }
 
-//     pub fn block_quote(len: usize) -> Self {
-//         Token::BlockQuote(BlockQuote::new(len))
-//     }
+    fn token_type(&self) -> &TokenType {
+        &self.token_type
+    }
 
-//     pub fn list(list_type: ListType, start: usize, tight: bool, len: usize) -> Self {
-//         Token::List(List::new(list_type, start, tight, len))
-//     }
+    fn location(&self) -> Location {
+        self.location
+    }
 
-//     pub fn list_item(len: usize) -> Self {
-//         Token::ListItem(ListItem::new(len))
-//     }
+    fn render(&self) -> String {
+        // let mut result = format!("{}:\n", self.name);
+        let mut result = String::new();
+        for child in &self.children {
+            result.push_str(&format!("{}\n", child.render()));
+        }
+        result
+    }
 
-//     pub fn convert_to_heading(&mut self, heading_level: u8) -> Option<Self> {
-//         match self {
-//             Token::Paragraph(paragraph_token) => Some(Token::Heading(Heading {
-//                 inline_text: paragraph_token.inline_text.clone(),
-//                 heading_level,
-//             })),
-//             _ => None, // Non-Paragraph Tokens cannot be converted.
-//         }
-//     }
+    fn finalize(&mut self) {
+        todo!()
+    }
 
-//     // Link reference definitions
-//     // link label, link destination, link title(optional)
-//     // pub fn convert_to_Link_reference_definitions(&mut self, heading_level: u8) {
-//     //     match self {
-//     //         Token::Paragraph(paragraph_token) => {}
-//     //         _ => {} // Non-Paragraph Tokens cannot be converted.
-//     //     }
-//     // }
-// }
+    fn should_start(&self, text: &String, current_column: usize) -> bool {
+        todo!()
+    }
 
-// #[derive(Debug)]
-// pub struct DocumentToken {
-//     children: Vec<Box<dyn Token>>,
-// }
+    fn should_continue(&self, text: &String, current_column: usize) -> bool {
+        todo!()
+    }
 
-// impl DocumentToken {
-//     pub fn new() -> Self {
-//         DocumentToken {
-//             children: Vec::new(),
-//         }
-//     }
-// }
-// impl Token for DocumentToken {
-//     fn is_leaf(&self) -> bool {
-//         false
-//     }
-//     fn render(&self) -> String {
-//         // let mut result = format!("{}:\n", self.name);
-//         let mut result = String::new();
-//         for child in &self.children {
-//             result.push_str(&format!("{}\n", child.render()));
-//         }
-//         result
-//     }
-// }
+    fn should_transform(&self, text: &String, current_column: usize) -> bool {
+        todo!()
+    }
+    fn handle_start(&mut self, text: &String, current_column: usize) -> Box<dyn CToken> {
+        todo!()
+    }
 
-// #[derive(Debug)]
-// pub struct Paragraph {
-//     pub inline_text: String,
-// }
+    fn handle_continuation(&mut self, text: &String, current_column: usize) -> Option<String> {
+        todo!()
+    }
 
-// impl Paragraph {
-//     pub fn new(inline_text: String) -> Self {
-//         Paragraph { inline_text }
-//     }
-//     pub fn set_inline_text(&mut self, new_inline_text: String) {
-//         self.inline_text = new_inline_text;
-//     }
-// }
-
-// #[derive(Debug)]
-// pub struct Heading {
-//     pub inline_text: String,
-//     pub heading_level: u8,
-// }
-
-// impl Heading {
-//     pub fn new(inline_text: String, heading_level: u8) -> Self {
-//         Heading {
-//             inline_text,
-//             heading_level,
-//         }
-//     }
-//     pub fn set_inline_text(&mut self, new_inline_text: String) {
-//         self.inline_text = new_inline_text;
-//     }
-// }
-// #[derive(Debug)]
-// pub struct CodeBlock {
-//     pub text: String,
-//     pub info_string: String,
-// }
-// impl CodeBlock {
-//     pub fn new(text: String, info_string: String) -> Self {
-//         CodeBlock { text, info_string }
-//     }
-//     pub fn set_inline_text(&mut self, new_text: String) {
-//         self.text = new_text;
-//     }
-// }
-
-// #[derive(Debug)]
-// pub struct HTMLBlock {
-//     pub text: String,
-// }
-
-// impl HTMLBlock {
-//     pub fn new(text: String) -> Self {
-//         HTMLBlock { text }
-//     }
-//     pub fn set_inline_text(&mut self, new_text: String) {
-//         self.text = new_text;
-//     }
-// }
-
-// #[derive(Debug)]
-// pub struct BlockQuote {
-//     pub len: usize,
-// }
-
-// impl BlockQuote {
-//     pub fn new(len: usize) -> Self {
-//         BlockQuote { len }
-//     }
-
-//     pub fn set_len(&mut self, new_len: usize) {
-//         self.len = new_len;
-//     }
-// }
-
-// #[derive(Debug)]
-// pub struct ListItem {
-//     pub len: usize,
-// }
-
-// impl ListItem {
-//     pub fn new(len: usize) -> Self {
-//         ListItem { len }
-//     }
-
-//     pub fn set_len(&mut self, new_len: usize) {
-//         self.len = new_len;
-//     }
-// }
-
-// #[derive(Debug)]
-// pub enum ListType {
-//     Ordered,
-//     // -, +, or *
-//     BulletMinus,
-//     BulletPlus,
-//     BulletAsterisk,
-// }
-
-// #[derive(Debug)]
-// pub struct List {
-//     pub list_type: ListType,
-//     pub start: usize,
-//     pub tight: bool,
-//     pub len: usize,
-// }
-
-// impl List {
-//     pub fn new(list_type: ListType, start: usize, tight: bool, len: usize) -> Self {
-//         List {
-//             list_type,
-//             start,
-//             tight,
-//             len,
-//         }
-//     }
-
-//     pub fn set_len(&mut self, new_len: usize) {
-//         self.len = new_len;
-//     }
-// }
+    fn handle_transform(&mut self, text: &String, current_column: usize) -> Box<dyn CToken> {
+        todo!()
+    }
+}
