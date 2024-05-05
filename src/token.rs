@@ -108,3 +108,13 @@ impl CToken for RootToken {
         todo!()
     }
 }
+
+pub fn find_applicable_token(
+    block_token: Vec<Box<dyn CToken>>,
+    text: &String,
+    current_column: usize,
+) -> Option<Box<dyn CToken>> {
+    block_token
+        .into_iter()
+        .find(|token| token.should_start(text, current_column))
+}
