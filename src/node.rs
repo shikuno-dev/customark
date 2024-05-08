@@ -3,7 +3,8 @@ pub enum NodeType {
     Root,
     BlockLeaf { name: String },
     BlockContainer { name: String },
-    Inline { name: String },
+    InlineLeaf { name: String },
+    InlineContainer { name: String },
 }
 
 #[derive(Copy, Clone, Default, Debug)]
@@ -17,6 +18,8 @@ pub trait Node: std::fmt::Debug {
 
     fn children(&self) -> Option<&Vec<Box<dyn Node>>>;
 
+    fn deepth(&self) -> usize;
+
     // Return the type of the token.
     fn token_type(&self) -> &NodeType;
 
@@ -25,6 +28,39 @@ pub trait Node: std::fmt::Debug {
 
     // Render the token into a string representation.
     fn render(&self) -> String;
+
+    // Method to determine the start condition of a block
+    fn should_start(&self, text: &str, current_column: usize) -> bool;
+
+    // Method to determine the continuation condition of a block
+    #[allow(unused_variables)]
+    fn should_continue(&self, text: &str, current_column: usize) -> bool {
+        false
+    }
+
+    // Method to determine whether current token should be transformed into a different type of token.
+    #[allow(unused_variables)]
+    fn should_transform(&self, text: &str, current_column: usize) -> bool {
+        false
+    }
+
+    // Method to handle the start of the block
+    fn handle_start(&mut self, text: &str, current_column: usize) -> Box<dyn Node>;
+
+    // Method to handle the continuation of the block
+    #[allow(unused_variables)]
+    fn handle_continuation(&mut self, text: &str, current_column: usize) -> Option<String> {
+        None
+    }
+
+    // Method to convert the current token to a different type of token.
+    #[allow(unused_variables)]
+    fn handle_transform(&mut self, text: &str, current_column: usize) -> Option<Box<dyn Node>> {
+        None
+    }
+
+    // Finalizes the token after processing.
+    fn finalize(&mut self) {}
 }
 
 #[derive(Debug)]
@@ -52,6 +88,9 @@ impl Node for RootNode {
         Some(&self.children)
     }
 
+    fn deepth(&self) -> usize {
+        0
+    }
     fn token_type(&self) -> &NodeType {
         &self.token_type
     }
@@ -67,50 +106,15 @@ impl Node for RootNode {
         }
         result
     }
+
+    fn should_start(&self, text: &str, current_column: usize) -> bool {
+        todo!()
+    }
+
+    fn handle_start(&mut self, text: &str, current_column: usize) -> Box<dyn Node> {
+        todo!()
+    }
 }
-
-pub trait BlockNode: Node {
-    // Method to determine the start condition of a block
-    fn should_start(&self, text: &str, current_column: usize) -> bool;
-
-    // Method to determine the continuation condition of a block
-    #[allow(unused_variables)]
-    fn should_continue(&self, text: &str, current_column: usize) -> bool {
-        false
-    }
-
-    // Method to determine whether current token should be transformed into a different type of token.
-    #[allow(unused_variables)]
-    fn should_transform(&self, text: &str, current_column: usize) -> bool {
-        false
-    }
-
-    // Method to handle the start of the block
-    fn handle_start(&mut self, text: &str, current_column: usize) -> Box<dyn BlockNode>;
-
-    // Method to handle the continuation of the block
-    #[allow(unused_variables)]
-    fn handle_continuation(&mut self, text: &str, current_column: usize) -> Option<String> {
-        None
-    }
-
-    // Method to convert the current token to a different type of token.
-    #[allow(unused_variables)]
-    fn handle_transform(
-        &mut self,
-        text: &str,
-        current_column: usize,
-    ) -> Option<Box<dyn BlockNode>> {
-        None
-    }
-
-    // Finalizes the token after processing.
-    fn finalize(&mut self);
-
-    // fn flatten(&self) -> Vec<&dyn CNode>;
-}
-
-pub trait InlineNode: Node {}
 
 pub fn find_applicable_block_node(
     block_nodes: Vec<Box<dyn BlockNode>>,
