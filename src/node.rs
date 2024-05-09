@@ -16,6 +16,8 @@ pub struct Location {
 pub trait Node: std::fmt::Debug {
     fn add_child(&mut self, child: Box<dyn Node>);
 
+    fn last_child(&self);
+
     fn children(&self) -> Option<&Vec<Box<dyn Node>>>;
 
     fn deepth(&self) -> usize;
