@@ -18,9 +18,15 @@ pub trait Node: std::fmt::Debug {
 
     fn last_child(&self);
 
-    fn children(&self) -> Option<&Vec<Box<dyn Node>>>;
+    fn children(&self) -> Option<&Vec<Box<dyn Node>>> {
+        None
+    }
 
     fn deepth(&self) -> usize;
+
+    fn is_open(&self) -> bool {
+        unimplemented!()
+    }
 
     // Return the type of the token.
     fn token_type(&self) -> &NodeType;
@@ -103,9 +109,8 @@ impl Node for RootNode {
 
     fn render(&self) -> String {
         let mut result = String::new();
-        for child in &self.children {
-            result.push_str(&format!("{}\n", child.render()));
-        }
+        for child in &self.children {}
+        result.push_str(&format!("{}\n", child.render()));
         result
     }
 
