@@ -6,3 +6,5 @@ pub enum BreakType {
 pub struct Config {
     break_type: BreakType,
 }
+
+pub struct Parser {}
