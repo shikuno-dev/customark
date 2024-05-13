@@ -7,4 +7,6 @@ pub struct Config {
     break_type: BreakType,
 }
 
-pub struct Parser {}
+pub struct Parser {
+    pub config: Config,
+}
