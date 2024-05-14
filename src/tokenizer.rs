@@ -25,3 +25,17 @@ impl Tokenizer {
         root_token
     }
 }
+
+fn get_last_node(nodes: Option<&Vec<Box<dyn Node>>>) -> Option<&Box<dyn Node>> {
+    match nodes {
+        Some(node_vec) => node_vec.last(),
+        None => None,
+    }
+}
+
+pub fn is_paragraph_node(node_type: &NodeType) -> bool {
+    match node_type {
+        NodeType::BlockLeaf { name } if name == "paragraph" => true,
+        _ => false,
+    }
+}
