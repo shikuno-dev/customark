@@ -1,7 +1,12 @@
 use crate::token::CToken;
 
+// pub struct Tokenizer {
+//     block_tokens: Vec<Box<dyn CToken>>,
+// }
+
 pub struct Tokenizer {
-    block_tokens: Vec<Box<dyn CToken>>,
+    block_nodes: Vec<Box<dyn Node>>,
+    inline_nodes: Vec<Box<dyn Node>>,
 }
 
 impl Tokenizer {
