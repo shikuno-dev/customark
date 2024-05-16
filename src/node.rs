@@ -16,7 +16,9 @@ pub struct Location {
 pub trait Node: std::fmt::Debug {
     fn add_child(&mut self, child: Box<dyn Node>);
 
-    fn last_child(&self);
+    fn last_child(&self) -> Option<&Box<dyn Node>> {
+        None
+    }
 
     fn children(&self) -> Option<&Vec<Box<dyn Node>>> {
         None
