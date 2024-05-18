@@ -21,6 +21,8 @@ impl Tokenizer {
 
         let mut link_definitions: Vec<LinkReferenceDefinition> = Vec::new();
 
+        let mut end_with_paragraph: bool = false;
+
         for current_line in normalized_text.lines().enumerate() {
             let mut current_column: usize = 0; // Required for expanding tab
 
