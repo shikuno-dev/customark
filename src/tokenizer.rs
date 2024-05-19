@@ -33,9 +33,16 @@ impl Tokenizer {
     }
 }
 
-fn get_last_node(nodes: Option<&Vec<Box<dyn Node>>>) -> Option<&Box<dyn Node>> {
-    match nodes {
-        Some(node_vec) => node_vec.last(),
+fn get_last_open_node(children: Option<&Vec<Box<dyn Node>>>) -> Option<&Box<dyn Node>> {
+    match children {
+        Some(node_vec) => {
+            if let Some(last_node) = node_vec.last() {
+                if last_node.is_open() {
+                    return Some(last_node);
+                }
+            }
+            None
+        }
         None => None,
     }
 }
