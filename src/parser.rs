@@ -21,7 +21,14 @@ impl<'a> Parser<'a> {
     }
     fn parse(&self, text: &str) -> Box<dyn Node> {
         // self.config.block_nodes;
+        let normalized_text: String = text.replace("\r\n", "\n").replace('\r', "\n");
 
-        unimplemented!()
+        let mut root_node: Box<dyn Node> = Box::new(RootNode::default());
+        let mut parent_node: &Box<dyn Node> = &root_node;
+
+        let mut end_with_paragraph: bool = false;
+        let mut depth: usize = 0;
+
+        root_node
     }
 }
