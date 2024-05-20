@@ -19,4 +19,9 @@ impl<'a> Parser<'a> {
     pub fn new(config: Config) -> Self {
         Parser { config }
     }
+    fn parse(&self, text: &str) -> Box<dyn Node> {
+        // self.config.block_nodes;
+
+        unimplemented!()
+    }
 }
