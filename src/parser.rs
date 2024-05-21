@@ -32,3 +32,10 @@ impl<'a> Parser<'a> {
         root_node
     }
 }
+
+pub fn parse_inline(
+    mut parent_node: &Box<dyn Node>,
+    link_definitions: Vec<LinkReferenceDefinition>,
+    inline_nodes: Vec<Box<dyn Node>>,
+) {
+}
