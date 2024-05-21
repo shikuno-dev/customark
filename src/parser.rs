@@ -33,6 +33,9 @@ impl<'a> Parser<'a> {
     }
 }
 
+#[derive(Debug)]
+pub struct InlineParser {}
+
 pub fn parse_inline(
     mut parent_node: &Box<dyn Node>,
     link_definitions: Vec<LinkReferenceDefinition>,
