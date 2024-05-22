@@ -1,3 +1,5 @@
+use crate::link::LinkReferenceDefinition;
+
 pub enum BreakType {
     SoftLineBreak, // softbreak
     HardLineBreak, // Hard line breaks
