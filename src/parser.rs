@@ -6,6 +6,42 @@ pub enum BreakType {
 }
 pub trait Node: std::fmt::Debug {}
 
+#[derive(Debug)]
+pub enum NodeType<'a> {
+    Root,
+    BlockContainer { name: &'a str },
+    BlockLeaf { name: &'a str },
+    InlineContainer { name: &'a str },
+    InlineLeaf { name: &'a str },
+}
+
+#[derive(Copy, Clone, Default, Debug)]
+pub struct Location {
+    pub line: usize,
+    pub column: usize,
+}
+
+#[derive(Debug)]
+pub struct RootNode<'a> {
+    node_type: NodeType<'a>,
+    location: Location,
+    children: Vec<Box<dyn Node>>,
+    is_open: bool,
+    depth: usize,
+}
+
+impl<'a> Default for RootNode<'a> {
+    fn default() -> Self {
+        RootNode {
+            node_type: NodeType::Root,
+            location: Location::default(),
+            children: Vec::new(),
+            is_open: true,
+            depth: 0,
+        }
+    }
+}
+
 pub struct Config<'a> {
     break_type: BreakType,
     block_nodes: Vec<Box<dyn Node>>,
