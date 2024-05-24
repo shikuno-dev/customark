@@ -66,8 +66,25 @@ impl<'a> Parser<'a> {
 
         let mut end_with_paragraph: bool = false;
         let mut depth: usize = 0;
+        loop {
+            if let Some(last_child) = get_last_open_child(parent_node.children()) {}
+        }
 
         root_node
+    }
+}
+
+fn get_last_open_child(children: Option<&Vec<Box<dyn Node>>>) -> Option<&Box<dyn Node>> {
+    match children {
+        Some(node_vec) => {
+            if let Some(last_node) = node_vec.last() {
+                if last_node.is_open() {
+                    return Some(last_node);
+                }
+            }
+            None
+        }
+        None => None,
     }
 }
 
