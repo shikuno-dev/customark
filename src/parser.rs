@@ -88,6 +88,13 @@ fn get_last_open_child(children: Option<&Vec<Box<dyn Node>>>) -> Option<&Box<dyn
     }
 }
 
+pub fn is_block_leaf_of_type(node_type: &NodeType, type_name: &str) -> bool {
+    match node_type {
+        NodeType::BlockLeaf { name } if *name == type_name => true,
+        _ => false,
+    }
+}
+
 #[derive(Debug)]
 pub struct InlineParser {}
 
